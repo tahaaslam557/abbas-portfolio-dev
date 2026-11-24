@@ -18,6 +18,13 @@ const SPANS = [
   "md:col-span-7 aspect-[4/3] md:aspect-auto md:min-h-[28rem]",
 ];
 const spanFor = (i: number) => SPANS[i % SPANS.length]!;
+/** Real images keep their own proportions: only column widths follow the rhythm. */
+const WIDTHS = ["md:col-span-12", "md:col-span-7", "md:col-span-5", "md:col-span-5", "md:col-span-7"];
+const widthFor = (i: number) => WIDTHS[i % WIDTHS.length]!;
+
+/** Full-page website captures are far taller than wide — they get a scrolling frame instead of a crop. */
+const isTall = (img: ProjectImage) => img.height / img.width > 2.2;
+const TALL_SPAN = "md:col-span-12 h-[75vh] md:h-[88vh]";
 
 const PLACEHOLDER_VARIANTS: PlateVariant[] = ["web", "app", "brand", "graphic", "print"];
 
@@ -78,10 +85,10 @@ export function CaseGallery({ images, primary }: { images: ProjectImage[]; prima
 
   return (
     <>
-      <div className="grid gap-4 md:grid-cols-12 md:gap-6">
+      <div className="grid items-start gap-4 md:grid-cols-12 md:gap-6">
         {images.map((img, i) => (
-          <Reveal key={img.src} delay={(i % 2) * 0.08} className={cn("relative", spanFor(i))}>
-            <figure className="h-full">
+          <Reveal key={img.src} delay={(i % 2) * 0.08} className={cn("relative", isTall(img) ? TALL_SPAN : widthFor(i))}>
+            <figure className={isTall(img) ? "h-full" : undefined}>
               <button
                 type="button"
                 data-cursor="View"
@@ -90,25 +97,37 @@ export function CaseGallery({ images, primary }: { images: ProjectImage[]; prima
                   setOpen(i);
                 }}
                 aria-label={`Enlarge image ${i + 1}: ${img.alt}`}
-                className="group relative block h-full min-h-full w-full overflow-hidden border border-line bg-panel"
+                className={cn("dark group relative block w-full overflow-hidden text-ivory", isTall(img) && "h-full border border-line bg-panel")}
               >
-                <Image
-                  src={img.src}
-                  alt={img.alt}
-                  fill
-                  sizes={i % SPANS.length === 0 ? "100vw" : "(min-width: 768px) 58vw, 100vw"}
-                  className="object-cover transition-transform duration-[1.4s] ease-out-expo group-hover:scale-[1.04]"
-                />
-                <span aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(180deg,transparent_55%,rgb(8_9_11/0.75))] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                {isTall(img) ? (
+                  <>
+                    <Image
+                      src={img.src}
+                      alt={img.alt}
+                      fill
+                      sizes="100vw"
+                      className="object-cover object-top transition-[object-position] duration-[12s] ease-in-out group-hover:object-bottom group-focus-visible:object-bottom motion-reduce:transition-none"
+                    />
+                    <span className="label absolute bottom-4 left-1/2 hidden -translate-x-1/2 items-center gap-2 rounded-full bg-void/70 px-4 py-2 text-[0.75rem] text-ivory backdrop-blur-md transition-opacity duration-500 group-hover:opacity-0 md:inline-flex">
+                      <span aria-hidden="true" className="size-1.5 rounded-full bg-accent" />
+                      Hover to scroll the full page
+                    </span>
+                  </>
+                ) : (
+                  <Image
+                    src={img.src}
+                    alt={img.alt}
+                    width={img.width}
+                    height={img.height}
+                    sizes={i % WIDTHS.length === 0 ? "100vw" : "(min-width: 768px) 58vw, 100vw"}
+                    className="block h-auto w-full"
+                  />
+                )}
                 <span aria-hidden="true" className="absolute right-4 top-4 grid size-11 place-items-center rounded-full bg-ivory text-void opacity-0 transition-all duration-500 group-hover:opacity-100 group-focus-visible:opacity-100">
                   <Expand className="size-4" />
                 </span>
-                {img.caption && (
-                  <span className="absolute bottom-4 left-4 right-4 translate-y-2 text-left text-sm text-ivory opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
-                    {img.caption}
-                  </span>
-                )}
               </button>
+              {img.caption && !isTall(img) && <figcaption className="mt-3 text-sm text-muted">{img.caption}</figcaption>}
             </figure>
           </Reveal>
         ))}
@@ -150,9 +169,26 @@ export function CaseGallery({ images, primary }: { images: ProjectImage[]; prima
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.98 }}
                   transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                  className="pointer-events-none absolute inset-x-[var(--gutter)] inset-y-0 md:inset-x-24"
+                  className={cn(
+                    "absolute inset-y-0",
+                    isTall(current)
+                      ? "inset-x-0 overflow-y-auto overscroll-contain px-[var(--gutter)] md:px-24"
+                      : "pointer-events-none inset-x-[var(--gutter)] md:inset-x-24",
+                  )}
+                  onClick={(e) => e.target === e.currentTarget && close()}
                 >
-                  <Image src={current.src} alt={current.alt} fill sizes="100vw" className="object-contain" />
+                  {isTall(current) ? (
+                    <Image
+                      src={current.src}
+                      alt={current.alt}
+                      width={current.width}
+                      height={current.height}
+                      sizes="(min-width: 1024px) 64rem, 100vw"
+                      className="mx-auto h-auto w-full max-w-5xl"
+                    />
+                  ) : (
+                    <Image src={current.src} alt={current.alt} fill sizes="100vw" className="object-contain" />
+                  )}
                 </motion.div>
               </AnimatePresence>
               {n > 1 && (

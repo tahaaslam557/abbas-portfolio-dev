@@ -6,7 +6,7 @@ import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
 import type { Project } from "@/types/content";
 import { projectNumber } from "@/data/projects";
-import { ASPECT, ProjectVisual } from "./ExhibitPlate";
+import { ProjectVisual, visualFrame, visualRatio } from "./ExhibitPlate";
 import { PlaceholderTag } from "./PlaceholderTag";
 import { cn } from "@/lib/cn";
 
@@ -64,17 +64,11 @@ export function ProjectCard({
             whileInView={{ clipPath: "inset(0% 0 0 0)" }}
             viewport={{ once: true, margin: "0px 0px -10% 0px" }}
             transition={{ duration: 1.3, ease: EASE }}
-            className={cn(
-              "relative overflow-hidden border border-line bg-panel [transform-style:preserve-3d]",
-              ASPECT[project.plate.aspect].css,
-            )}
+            className={cn("relative overflow-hidden [transform-style:preserve-3d]", visualFrame(project))}
           >
-            <div className="h-full w-full scale-[1.06] transition-transform duration-[1.4s] ease-out-expo group-hover:scale-100">
+            <div style={{ aspectRatio: visualRatio(project) }} className="h-auto w-full">
               <ProjectVisual project={project} sizes={sizes} />
             </div>
-            <span aria-hidden="true" className="absolute left-4 top-4 display text-[0.95rem] text-ivory/70">
-              {projectNumber(project)}
-            </span>
             <span
               aria-hidden="true"
               className="absolute bottom-4 right-4 grid size-12 translate-y-3 place-items-center rounded-full bg-accent text-void opacity-0 transition-all duration-500 ease-out-expo group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100"
@@ -86,6 +80,7 @@ export function ProjectCard({
 
         <div className="mt-5 flex items-start justify-between gap-6 border-t border-line pt-4">
           <div>
+            <p className="label mb-3 text-[0.75rem] text-dim">{projectNumber(project)}</p>
             <H className="display text-[1.9rem] leading-none transition-colors duration-300 group-hover:text-accent">
               {project.title}
             </H>

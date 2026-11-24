@@ -74,7 +74,7 @@ export function HeroSection() {
               className="display text-[clamp(3.3rem,10.4vw,11.5rem)] text-ivory"
               lineClassName={(i) =>
                 cn(
-                  i === hero.accentLine && "serif-accent pl-[0.06em] text-[1.08em] leading-[0.86] tracking-[-0.03em]",
+                  i === hero.accentLine && "serif-accent pl-[0.06em] text-[1.08em] leading-[0.86] tracking-[-0.03em] text-accent",
                   i === 2 && "lg:pl-[1.6em]",
                 )
               }

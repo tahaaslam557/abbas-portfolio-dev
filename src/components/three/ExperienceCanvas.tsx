@@ -6,6 +6,13 @@ import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { SignatureSculpture } from "./SignatureSculpture";
 import { pointer, type Pose, type PoseMap } from "@/lib/scene";
+import { useTheme } from "@/hooks/useTheme";
+
+/** Scene colours per theme: fog matches the page background, linework matches the type. */
+const SCENE = {
+  dark: { fog: "#08090b", ink: "#f2efe9", accent: "#ff5a36", frameFill: 0.025, frameLine: 0.18, dust: 0.4 },
+  light: { fog: "#f4f1ea", ink: "#141519", accent: "#c4391a", frameFill: 0.03, frameLine: 0.22, dust: 0.35 },
+} as const;
 
 type Tier = "lite" | "full";
 
@@ -145,6 +152,7 @@ const FRAME_SPECS = [
 ] as const;
 
 function ArchiveFrames({ animate }: { animate: boolean }) {
+  const c = SCENE[useTheme().theme];
   const refs = useRef<(THREE.Group | null)[]>([]);
   const edges = useMemo(
     () =>
@@ -180,10 +188,10 @@ function ArchiveFrames({ animate }: { animate: boolean }) {
         >
           <mesh>
             <planeGeometry args={[f.w, f.h]} />
-            <meshBasicMaterial color="#f2efe9" transparent opacity={0.025} depthWrite={false} side={THREE.DoubleSide} />
+            <meshBasicMaterial color={c.ink} transparent opacity={c.frameFill} depthWrite={false} side={THREE.DoubleSide} />
           </mesh>
           <lineSegments geometry={edges[i]}>
-            <lineBasicMaterial color={i === 2 ? "#ff5a36" : "#f2efe9"} transparent opacity={i === 2 ? 0.55 : 0.18} />
+            <lineBasicMaterial color={i === 2 ? c.accent : c.ink} transparent opacity={i === 2 ? 0.55 : c.frameLine} />
           </lineSegments>
         </group>
       ))}
@@ -196,6 +204,7 @@ function ArchiveFrames({ animate }: { animate: boolean }) {
 /* ------------------------------------------------------------------ */
 
 function Dust({ count, animate }: { count: number; animate: boolean }) {
+  const c = SCENE[useTheme().theme];
   const ref = useRef<THREE.Points>(null);
   const geo = useMemo(() => {
     const g = new THREE.BufferGeometry();
@@ -220,7 +229,7 @@ function Dust({ count, animate }: { count: number; animate: boolean }) {
   });
   return (
     <points ref={ref} geometry={geo}>
-      <pointsMaterial color="#f2efe9" size={0.022} sizeAttenuation transparent opacity={0.4} depthWrite={false} />
+      <pointsMaterial color={c.ink} size={0.022} sizeAttenuation transparent opacity={c.dust} depthWrite={false} />
     </points>
   );
 }
@@ -257,6 +266,7 @@ function usePointerInput(enabled: boolean) {
 
 export default function ExperienceCanvas({ poses, tier, animate, onReady }: ExperienceCanvasProps) {
   usePointerInput(animate);
+  const c = SCENE[useTheme().theme];
 
   return (
     <Canvas
@@ -273,7 +283,7 @@ export default function ExperienceCanvas({ poses, tier, animate, onReady }: Expe
       style={{ pointerEvents: "none" }}
       aria-hidden="true"
     >
-      <fog attach="fog" args={["#08090b", 7, 16]} />
+      <fog key={c.fog} attach="fog" args={[c.fog, 7, 16]} />
       <Environment resolution={tier === "full" ? 256 : 128} frames={1}>
         {/* Key: soft ivory softbox overhead */}
         <Lightformer form="rect" intensity={3.4} color="#f4efe6" position={[0, 5, 2]} scale={[10, 3, 1]} rotation-x={Math.PI / 2} />

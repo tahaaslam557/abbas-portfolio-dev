@@ -13,18 +13,19 @@ import {
 import { useRef, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import type { PlateAspect, Project } from "@/types/content";
+import { cn } from "@/lib/cn";
 import { projectNumber } from "@/data/projects";
-import { ProjectVisual } from "./ExhibitPlate";
+import { ProjectVisual, visualFrame, visualRatio, visualShadow } from "./ExhibitPlate";
 import { PlaceholderTag } from "./PlaceholderTag";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-/** Frame height drives size; width follows the artwork's proportion. */
+/** Frame height drives size; width follows the artwork's own proportion (real images are never cropped). */
 const FRAME_H: Record<PlateAspect, string> = {
-  wide: "h-[min(44vh,30vw)] aspect-[16/9]",
-  landscape: "h-[min(50vh,32vw)] aspect-[4/3]",
-  portrait: "h-[min(62vh,40vw)] aspect-[4/5]",
-  square: "h-[min(54vh,36vw)] aspect-square",
+  wide: "h-[min(46vh,30vw)]",
+  landscape: "h-[min(50vh,32vw)]",
+  portrait: "h-[min(62vh,40vw)]",
+  square: "h-[min(54vh,36vw)]",
 };
 
 /**
@@ -174,16 +175,28 @@ function Frame({
           onFocus={onFocus}
           data-cursor="Open"
           aria-label={`${project.title} — ${project.category}. Open case study`}
-          className={`group relative block ${FRAME_H[project.plate.aspect]} overflow-hidden border border-line-strong bg-panel shadow-[0_60px_120px_-40px_rgb(0_0_0/0.9)]`}
+          className="dark group relative block text-ivory"
         >
-          <motion.div style={{ filter: brightness }} className="h-full w-full transition-transform duration-[1.2s] ease-out-expo group-hover:scale-[1.04]">
+          <span
+            style={{ aspectRatio: visualRatio(project) }}
+            className={cn(
+              "relative block overflow-hidden",
+              visualShadow(project),
+              FRAME_H[project.plate.aspect],
+              visualFrame(project),
+            )}
+          >
+          <motion.div style={{ filter: brightness }} className="h-full w-full">
             <ProjectVisual project={project} sizes="50vw" />
           </motion.div>
-          {/* sheen */}
-          <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,transparent_35%,rgb(242_239_233/0.07)_48%,transparent_60%)] opacity-0 transition-opacity duration-700 group-hover:opacity-100" />
-          {/* caption strip */}
-          <span className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-void/90 to-transparent px-5 pb-4 pt-10">
-            <span className="label text-[0.75rem] text-ivory/80">
+          {/* sheen (placeholder plates only — it would outline a transparent image) */}
+          {!project.coverImage && (
+            <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,transparent_35%,rgb(242_239_233/0.07)_48%,transparent_60%)] opacity-0 transition-opacity duration-700 group-hover:opacity-100" />
+          )}
+          </span>
+          {/* caption — sits under the artwork, never on it */}
+          <span className="mt-4 flex items-center justify-between gap-6">
+            <span className="label text-[0.75rem] text-muted">
               {projectNumber(project)} — {project.category}
             </span>
             <span className="label flex translate-y-2 items-center gap-2 text-[0.75rem] text-accent opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100">

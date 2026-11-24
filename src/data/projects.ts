@@ -19,16 +19,85 @@ import type { Project } from "@/types/content";
  */
 export const projects: Project[] = [
   {
-    slug: "exhibit-01-website",
-    title: "Exhibit 01",
+    slug: "heth-nmn-website",
+    title: "HETH",
     category: "Website Design",
     shortDescription:
-      "Reserved for a website design case study — structure, interface and responsive behaviour.",
-    deliverables: ["Website design", "Responsive layouts", "UI components"],
-    gallery: [],
+      "E-commerce website for HETH, a liposomal NMN supplement brand — a fresh, science-led storefront designed for desktop and mobile.",
+    client: "HETH",
+    deliverables: ["Website design", "Responsive layouts", "Product page", "Design system"],
+    // TODO(Abbas): add year, role, challenge and outcome once confirmed.
+    approach:
+      "The site moves from wireframe to mid-fidelity to final design on a 12-column, 1440px grid. The visual language pairs a deep-forest-to-lime green palette with DM Sans, soft product photography and rounded components — so the science reads as trustworthy while the brand still feels fresh and energetic. Every section was designed alongside its mobile layout.",
+    coverImage: {
+      src: "/projects/heth-nmn-website/cover.webp",
+      alt: "HETH NMN website homepage shown on a laptop and a phone",
+      width: 2800,
+      height: 1673,
+    },
+    process: [
+      {
+        src: "/projects/heth-nmn-website/process-01-wireframe-to-final.webp",
+        alt: "The HETH homepage in three stages: wireframe, mid-fidelity and final design",
+        caption: "Wireframe → mid-fidelity → final design, on a 12-column 1440px grid.",
+        width: 2800,
+        height: 1084,
+      },
+      {
+        src: "/projects/heth-nmn-website/process-02-design-system.webp",
+        alt: "HETH design system on three phones: component library, typography and colour palette, and footer",
+        caption: "Component library, type and colour system applied across mobile screens.",
+        width: 2400,
+        height: 1407,
+      },
+    ],
+    fullPage: {
+      src: "/projects/heth-nmn-website/gallery-01-full-homepage.webp",
+      alt: "Full-length HETH homepage design with mobile screens alongside",
+      caption: "The full homepage — hero, science, trust, testimonials, FAQ and footer.",
+      width: 1600,
+      height: 6840,
+    },
+    gallery: [
+      {
+        src: "/projects/heth-nmn-website/cover.webp",
+        alt: "HETH NMN website homepage shown on a laptop and a phone",
+        caption: "Homepage hero on desktop and mobile.",
+        width: 2800,
+        height: 1673,
+      },
+      {
+        src: "/projects/heth-nmn-website/gallery-02-mobile-screens.webp",
+        alt: "Three HETH mobile screens: benefits, customer review and footer",
+        caption: "Mobile: benefits, customer review and footer.",
+        width: 1849,
+        height: 1631,
+      },
+      {
+        src: "/projects/heth-nmn-website/gallery-03-product-photo.webp",
+        alt: "A hand holding a HETH NMN Liposomal 1000mg bottle against a blue sky",
+        caption: "Product photography used across the site.",
+        width: 1309,
+        height: 1631,
+      },
+      {
+        src: "/projects/heth-nmn-website/gallery-04-typography-colour.webp",
+        alt: "HETH typography (DM Sans) and green colour palette from #07160C to #C1DD29",
+        caption: "Typography: DM Sans. Colour: five greens from forest to lime.",
+        width: 1476,
+        height: 1843,
+      },
+      {
+        src: "/projects/heth-nmn-website/gallery-05-product-page.webp",
+        alt: "HETH product page with quantity bundles shown on a desktop monitor",
+        caption: "Product page with bundle pricing.",
+        width: 2089,
+        height: 1843,
+      },
+    ],
     featured: true,
     sortOrder: 1,
-    isPlaceholder: true,
+    isPlaceholder: false,
     plate: { variant: "web", aspect: "wide" },
   },
   {

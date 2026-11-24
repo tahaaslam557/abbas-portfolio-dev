@@ -60,7 +60,7 @@ const P = ribbonPaths();
 export function SceneFallback({ className }: { className?: string }) {
   return (
     <div className={className} aria-hidden="true">
-      <svg viewBox="0 0 400 400" className="drift h-full w-full" preserveAspectRatio="xMidYMid meet">
+      <svg viewBox="0 0 400 400" className="drift h-full w-full text-ivory" preserveAspectRatio="xMidYMid meet">
         <defs>
           <linearGradient id="fb-metal" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0" stopColor="#f6f1e8" />
@@ -81,7 +81,7 @@ export function SceneFallback({ className }: { className?: string }) {
         <path d={P.right} fill="none" stroke="url(#fb-warm)" strokeWidth="1.2" opacity="0.9" />
         <path d={P.spine} fill="none" stroke="url(#fb-metal)" strokeWidth="9" strokeLinecap="round" opacity="0.55" />
         <path d={P.spine} fill="none" stroke="url(#fb-metal)" strokeWidth="3" strokeLinecap="round" />
-        <path d={P.left} fill="none" stroke="#f2efe9" strokeWidth="0.9" opacity="0.75" />
+        <path d={P.left} fill="none" stroke="currentColor" strokeWidth="0.9" opacity="0.75" />
       </svg>
     </div>
   );

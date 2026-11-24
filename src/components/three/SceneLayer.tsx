@@ -55,7 +55,7 @@ export function SceneLayer({ poses }: SceneLayerProps) {
         </div>
       )}
       {/* vignette keeps type legible over any pose */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgb(8_9_11/0.7)_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgb(var(--void-rgb)/0.7)_100%)]" />
     </div>
   );
 }

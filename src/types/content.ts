@@ -40,6 +40,10 @@ export interface Project {
   coverImage?: ProjectImage;
   thumbnailImage?: ProjectImage;
   gallery: ProjectImage[];
+  /** Tall full-page capture. Shown as the case-study hero with scroll-on-hover. */
+  fullPage?: ProjectImage;
+  /** Sketches, wireframes and design-system boards shown in the Process chapter. */
+  process?: ProjectImage[];
   challenge?: string;
   approach?: string;
   /** Only factual, supplied outcomes. Never invented metrics. */

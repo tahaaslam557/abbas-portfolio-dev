@@ -3,6 +3,7 @@
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
+import { useTheme } from "@/hooks/useTheme";
 
 /**
  * OBJECT 001 — "THE CONTINUUM"
@@ -76,6 +77,8 @@ type Props = {
 };
 
 export function SignatureSculpture({ segments = 520, foldRef, animate }: Props) {
+  // Champagne satin on the dark canvas; graphite metal on light paper for contrast.
+  const front = useTheme().theme === "dark" ? "#efe9df" : "#3a3b40";
   const geometry = useMemo(() => {
     const g = new THREE.BufferGeometry();
     const count = segments * ACROSS;
@@ -126,7 +129,7 @@ export function SignatureSculpture({ segments = 520, foldRef, animate }: Props) 
       {/* Front face: champagne satin metal */}
       <mesh geometry={geometry}>
         <meshPhysicalMaterial
-          color="#efe9df"
+          color={front}
           metalness={1}
           roughness={0.22}
           clearcoat={0.8}

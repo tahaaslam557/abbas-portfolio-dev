@@ -8,18 +8,18 @@ import type { Project } from "@/types/content";
 import { projectNumber } from "@/data/projects";
 import { useFinePointer, usePrefersReducedMotion } from "@/hooks/useMediaQuery";
 import { WorkTile } from "./WorkTile";
-import { ASPECT, ProjectVisual } from "./ExhibitPlate";
+import { ProjectVisual, visualFrame, visualRatio, visualShadow } from "./ExhibitPlate";
 import { cn } from "@/lib/cn";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-/** Bento rhythm: a featured full-width tile, then alternating 7/5 · 5/7 pairs. */
+/** Rhythm: a featured full-width project, then alternating 7/5 · 5/7 columns. Heights follow each image. */
 function spanFor(i: number, total: number) {
-  if (i === 0) return "md:col-span-12 aspect-[4/5] sm:aspect-[16/10] md:aspect-auto md:h-[min(44rem,78vh)]";
-  const k = (i - 1) % 4;
+  if (i === 0) return "md:col-span-12";
   const isLastOdd = i === total - 1 && (total - 1) % 2 === 1;
-  if (isLastOdd) return "md:col-span-12 aspect-[4/5] sm:aspect-[16/10] md:aspect-auto md:h-[34rem]";
-  return cn("aspect-[4/5] sm:aspect-[4/3] md:aspect-auto md:h-[34rem]", k === 0 || k === 3 ? "md:col-span-7" : "md:col-span-5");
+  if (isLastOdd) return "md:col-span-8 md:col-start-3";
+  const k = (i - 1) % 4;
+  return k === 0 || k === 3 ? "md:col-span-7" : "md:col-span-5";
 }
 
 type View = "grid" | "list";
@@ -124,7 +124,7 @@ export function WorkIndex({ projects }: { projects: Project[] }) {
             transition={{ duration: 0.3 }}
             className="shell mt-10"
           >
-            <motion.ul layout={!reduce} className="grid gap-4 md:grid-cols-12 md:gap-6">
+            <motion.ul layout={!reduce} className="grid items-start gap-x-6 gap-y-16 md:grid-cols-12 md:gap-y-24">
               <AnimatePresence mode="popLayout">
                 {visible.map((p, i) => (
                   <motion.li
@@ -189,7 +189,7 @@ function IndexList({ projects }: { projects: Project[] }) {
               >
                 <span aria-hidden="true" className="absolute inset-x-[calc(var(--gutter)*-1)] inset-y-0 -z-10 origin-bottom scale-y-0 bg-panel transition-transform duration-700 ease-out-expo group-hover:scale-y-100" />
                 {/* Mobile thumbnail */}
-                <span aria-hidden="true" className="col-span-3 row-span-2 aspect-square overflow-hidden border border-line md:hidden">
+                <span aria-hidden="true" style={{ aspectRatio: visualRatio(p) }} className={cn("col-span-3 row-span-2 self-center overflow-hidden md:hidden", visualFrame(p))}>
                   <ProjectVisual project={p} sizes="25vw" />
                 </span>
                 <span className="label col-span-9 text-accent md:col-span-1">{projectNumber(p)}</span>
@@ -223,7 +223,8 @@ function IndexList({ projects }: { projects: Project[] }) {
                 animate={{ opacity: 1, scale: 1, rotate: 0 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ type: "spring", stiffness: 260, damping: 24 }}
-                className={cn("absolute bottom-0 w-full overflow-hidden border border-line-strong bg-panel shadow-2xl", ASPECT[hovered.plate.aspect].css)}
+                style={{ aspectRatio: visualRatio(hovered) }}
+                className={cn("absolute bottom-0 w-full overflow-hidden", visualFrame(hovered), visualShadow(hovered))}
               >
                 <ProjectVisual project={hovered} sizes="24rem" />
               </motion.div>

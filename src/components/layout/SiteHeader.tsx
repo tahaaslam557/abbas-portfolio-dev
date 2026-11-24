@@ -7,6 +7,7 @@ import { useState } from "react";
 import { site } from "@/data/site";
 import { cn } from "@/lib/cn";
 import { MobileNavigation } from "./MobileNavigation";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -50,12 +51,13 @@ export function SiteHeader() {
           </Link>
 
           {/* Desktop navigation — floats into a smoked-glass capsule once scrolled */}
-          <nav aria-label="Primary" className="pointer-events-auto hidden md:block">
+          <div className="pointer-events-auto hidden items-center gap-3 md:flex">
+          <nav aria-label="Primary">
             <div
               className={cn(
                 "flex items-center gap-1 rounded-full border p-1.5 transition-all duration-700 ease-out-expo",
                 compact
-                  ? "border-line bg-night/70 shadow-[0_10px_40px_-10px_rgb(0_0_0/0.6)] backdrop-blur-xl"
+                  ? "border-line bg-night/70 shadow-[0_10px_40px_-10px_rgb(0_0_0/0.18)] dark:shadow-[0_10px_40px_-10px_rgb(0_0_0/0.6)] backdrop-blur-xl"
                   : "border-transparent bg-transparent",
               )}
             >
@@ -95,14 +97,18 @@ export function SiteHeader() {
               </Link>
             </div>
           </nav>
+          <ThemeToggle />
+          </div>
 
-          {/* Mobile trigger */}
+          {/* Mobile: theme + menu */}
+          <div className="pointer-events-auto flex items-center gap-2 md:hidden">
+          <ThemeToggle />
           <button
             type="button"
             onClick={() => setOpen(true)}
             aria-expanded={open}
             aria-controls="mobile-nav"
-            className="pointer-events-auto flex h-11 items-center gap-3 rounded-full border border-line bg-night/70 pl-4 pr-3 backdrop-blur-xl md:hidden"
+            className="flex h-11 items-center gap-3 rounded-full border border-line bg-night/70 pl-4 pr-3 backdrop-blur-xl"
           >
             <span className="label text-[0.75rem]">Menu</span>
             <span className="flex flex-col gap-[5px]" aria-hidden="true">
@@ -110,6 +116,7 @@ export function SiteHeader() {
               <span className="h-px w-3.5 self-end bg-accent" />
             </span>
           </button>
+          </div>
         </div>
       </header>
       <MobileNavigation open={open} onClose={() => setOpen(false)} />

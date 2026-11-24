@@ -263,6 +263,30 @@ export function PlateArt({ variant, aspect, className }: { variant: PlateVariant
   );
 }
 
+/**
+ * The proportion a project should be displayed at: the real cover's own
+ * width/height when supplied (so it is never cropped), otherwise the plate's.
+ */
+export function visualRatio(project: Project): string {
+  const img = project.coverImage;
+  if (img) return `${img.width} / ${img.height}`;
+  const { w, h } = ASPECT[project.plate.aspect];
+  return `${w} / ${h}`;
+}
+
+/**
+ * Placeholder plates sit in a hairline frame with a soft shadow.
+ * Real images are shown exactly as they are — no frame, no background and no
+ * box-shadow (a rectangular shadow would outline transparent PNGs as a box).
+ */
+export function visualFrame(project: Project): string {
+  return project.coverImage ? "" : "border border-line bg-panel";
+}
+
+export function visualShadow(project: Project): string {
+  return project.coverImage ? "" : "shadow-[0_60px_120px_-40px_rgb(0_0_0/0.55)]";
+}
+
 /** Real cover image when supplied, otherwise the abstract plate. */
 export function ProjectVisual({
   project,

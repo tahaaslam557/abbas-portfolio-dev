@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import type { PlateVariant, Project } from "@/types/content";
@@ -8,7 +9,8 @@ import { CaseHeroVisual } from "./CaseHeroVisual";
 import { CaseChapterNav, type ChapterItem } from "./CaseChapterNav";
 import { CaseGallery } from "./CaseGallery";
 import { PlaceholderTag } from "./PlaceholderTag";
-import { PlateArt, ProjectVisual } from "./ExhibitPlate";
+import { PlateArt, ProjectVisual, visualFrame, visualRatio } from "./ExhibitPlate";
+import { cn } from "@/lib/cn";
 
 /** Clearly-marked slot telling Abbas what belongs here. Never pretends to be content. */
 function PendingNote({ children }: { children: React.ReactNode }) {
@@ -226,7 +228,28 @@ export function CaseStudyLayout({ project }: { project: Project }) {
           </Chapter>
 
           <Chapter id="process" index="04" kicker="Making" title={<>From sketch <span className="serif-accent text-muted">to</span> system.</>}>
-            {project.gallery.length === 0 ? (
+            {project.process && project.process.length > 0 ? (
+              <div className="space-y-10">
+                {project.process.map((img, i) => (
+                  <figure key={img.src}>
+                    <div className="group overflow-hidden border border-line bg-panel">
+                      <Image
+                        src={img.src}
+                        alt={img.alt}
+                        width={img.width}
+                        height={img.height}
+                        sizes="(min-width: 1024px) 70vw, 100vw"
+                        className="h-auto w-full transition-transform duration-[1.4s] ease-out-expo group-hover:scale-[1.02]"
+                      />
+                    </div>
+                    <figcaption className="mt-4 flex gap-4 text-[0.95rem] text-muted">
+                      <span className="label pt-0.5 text-[0.75rem] text-accent">{String(i + 1).padStart(2, "0")}</span>
+                      {img.caption ?? img.alt}
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            ) : project.gallery.length === 0 ? (
               <div className="grid gap-4 sm:grid-cols-5">
                 {[project.plate.variant, altVariant].map((v, i) => (
                   <figure key={i} className={i === 0 ? "sm:col-span-3" : "sm:col-span-2"}>
@@ -291,28 +314,35 @@ export function CaseStudyLayout({ project }: { project: Project }) {
           </Link>
         </div>
 
-        <Link href={`/work/${next.slug}`} data-cursor="Next" className="group relative block overflow-hidden border-b border-line">
-          <div aria-hidden="true" className="absolute inset-0 opacity-35 transition-all duration-[1.4s] ease-out-expo group-hover:scale-105 group-hover:opacity-60">
-            <ProjectVisual project={next} sizes="100vw" />
-          </div>
-          <span aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(90deg,rgb(8_9_11/0.95)_15%,rgb(8_9_11/0.4))]" />
-          <div className="shell relative flex flex-col gap-10 py-24 md:flex-row md:items-end md:justify-between md:py-36">
-            <div>
+        <Link href={`/work/${next.slug}`} data-cursor="Next" className="group block border-b border-line">
+          <div className="shell grid items-center gap-10 py-20 md:grid-cols-12 md:py-28">
+            <div className="md:col-span-6">
               <p className="label flex items-center gap-4 text-accent">
                 <span aria-hidden="true" className="h-px w-10 bg-accent transition-all duration-700 ease-out-expo group-hover:w-20" />
                 Next exhibit — {projectNumber(next)}
               </p>
-              <p className="display mt-6 text-[clamp(3rem,10vw,9.5rem)] transition-colors duration-500 group-hover:text-accent">
+              <p className="display mt-6 text-[clamp(3rem,8vw,8rem)] transition-colors duration-500 group-hover:text-accent">
                 {next.title}
               </p>
               <p className="mt-3 text-lg text-muted">{next.category}</p>
+              <span
+                aria-hidden="true"
+                className="mt-10 grid size-20 place-items-center rounded-full border border-line-strong transition-all duration-700 ease-out-expo group-hover:border-accent group-hover:bg-accent group-hover:text-void md:size-24"
+              >
+                <ArrowUpRight className="size-7 transition-transform duration-700 ease-out-expo group-hover:rotate-45" />
+              </span>
             </div>
-            <span
-              aria-hidden="true"
-              className="grid size-24 shrink-0 place-items-center rounded-full border border-line-strong transition-all duration-700 ease-out-expo group-hover:border-accent group-hover:bg-accent group-hover:text-void md:size-32"
-            >
-              <ArrowUpRight className="size-8 transition-transform duration-700 ease-out-expo group-hover:rotate-45" />
-            </span>
+            <div aria-hidden="true" className="md:col-span-6">
+              <div
+                style={{ aspectRatio: visualRatio(next) }}
+                className={cn(
+                  "relative overflow-hidden transition-transform duration-700 ease-out-expo group-hover:-translate-y-1.5 motion-reduce:transform-none",
+                  visualFrame(next),
+                )}
+              >
+                <ProjectVisual project={next} sizes="(min-width: 768px) 50vw, 100vw" />
+              </div>
+            </div>
           </div>
         </Link>
       </nav>
