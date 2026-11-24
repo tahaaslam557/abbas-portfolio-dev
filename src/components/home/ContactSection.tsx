@@ -9,7 +9,7 @@ export function ContactSection() {
   return (
     <section data-scene="contact" aria-labelledby="contact-title" className="relative z-10 flex min-h-[100svh] flex-col justify-center py-28">
       <div className="shell">
-        <SectionLabel index="A/05">Contact</SectionLabel>
+        <SectionLabel index="A/06">Contact</SectionLabel>
         <div className="mt-10 grid items-end gap-14 lg:grid-cols-12">
           <div className="lg:col-span-8">
             <MaskLines

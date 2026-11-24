@@ -5,6 +5,7 @@ import { SelectedWork } from "@/components/home/SelectedWork";
 import { AboutPreview } from "@/components/home/AboutPreview";
 import { ServicesSection } from "@/components/home/ServicesSection";
 import { ProcessSection } from "@/components/home/ProcessSection";
+import { TestimonialsSection } from "@/components/home/TestimonialsSection";
 import { ContactSection } from "@/components/home/ContactSection";
 import { homePoses } from "@/lib/scene";
 
@@ -19,6 +20,7 @@ export default function HomePage() {
         <AboutPreview />
         <ServicesSection />
         <ProcessSection />
+        <TestimonialsSection />
         <ContactSection />
       </div>
     </>

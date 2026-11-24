@@ -3,32 +3,32 @@
 import Link from "next/link";
 import { AnimatePresence, motion, useMotionValue, useSpring } from "motion/react";
 import { useMemo, useState } from "react";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, LayoutGrid, List } from "lucide-react";
 import type { Project } from "@/types/content";
 import { projectNumber } from "@/data/projects";
-import { useFinePointer } from "@/hooks/useMediaQuery";
-import { ProjectCard } from "./ProjectCard";
+import { useFinePointer, usePrefersReducedMotion } from "@/hooks/useMediaQuery";
+import { WorkTile } from "./WorkTile";
 import { ASPECT, ProjectVisual } from "./ExhibitPlate";
 import { cn } from "@/lib/cn";
 
-const GRID_LAYOUT = [
-  "md:col-span-7",
-  "md:col-span-5 md:mt-40",
-  "md:col-span-5 md:col-start-2",
-  "md:col-span-6 md:mt-24",
-  "md:col-span-6 md:col-start-4",
-  "md:col-span-5 md:col-start-8 md:-mt-24",
-];
+const EASE = [0.16, 1, 0.3, 1] as const;
 
-/** Filters only appear once there's enough work for them to be useful. */
-const MIN_FOR_FILTERS = 8;
+/** Bento rhythm: a featured full-width tile, then alternating 7/5 · 5/7 pairs. */
+function spanFor(i: number, total: number) {
+  if (i === 0) return "md:col-span-12 aspect-[4/5] sm:aspect-[16/10] md:aspect-auto md:h-[min(44rem,78vh)]";
+  const k = (i - 1) % 4;
+  const isLastOdd = i === total - 1 && (total - 1) % 2 === 1;
+  if (isLastOdd) return "md:col-span-12 aspect-[4/5] sm:aspect-[16/10] md:aspect-auto md:h-[34rem]";
+  return cn("aspect-[4/5] sm:aspect-[4/3] md:aspect-auto md:h-[34rem]", k === 0 || k === 3 ? "md:col-span-7" : "md:col-span-5");
+}
+
+type View = "grid" | "list";
 
 export function WorkIndex({ projects }: { projects: Project[] }) {
+  const reduce = usePrefersReducedMotion();
   const categories = useMemo(() => Array.from(new Set(projects.map((p) => p.category))), [projects]);
-  const showFilters =
-    projects.length >= MIN_FOR_FILTERS &&
-    categories.some((c) => projects.filter((p) => p.category === c).length > 1);
   const [filter, setFilter] = useState<string | null>(null);
+  const [view, setView] = useState<View>("grid");
   const visible = filter ? projects.filter((p) => p.category === filter) : projects;
 
   if (projects.length === 0) {
@@ -46,42 +46,109 @@ export function WorkIndex({ projects }: { projects: Project[] }) {
   }
 
   return (
-    <>
-      {showFilters && (
-        <div className="shell mb-10 flex flex-wrap items-baseline gap-x-6 gap-y-3" role="group" aria-label="Filter by discipline">
-          {[null, ...categories].map((c) => (
-            <button
-              key={c ?? "all"}
-              type="button"
-              aria-pressed={filter === c}
-              onClick={() => setFilter(c)}
-              className={cn(
-                "display text-2xl transition-colors",
-                filter === c ? "text-ivory" : "text-dim hover:text-muted",
-              )}
-            >
-              {c ?? "Everything"}
-              <sup className="label ml-1 text-[0.75rem] text-accent">
-                {c ? projects.filter((p) => p.category === c).length : projects.length}
-              </sup>
-            </button>
-          ))}
+    <section aria-label="Projects">
+      {/* Toolbar */}
+      <div className="shell">
+        <div className="flex flex-col gap-6 border-y border-line py-5 lg:flex-row lg:items-center lg:justify-between">
+          {categories.length > 1 ? (
+            <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 lg:flex-wrap lg:overflow-visible lg:pb-0" role="group" aria-label="Filter by discipline">
+              {[null, ...categories].map((c) => {
+                const on = filter === c;
+                const n = c ? projects.filter((p) => p.category === c).length : projects.length;
+                return (
+                  <button
+                    key={c ?? "all"}
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() => setFilter(c)}
+                    className={cn(
+                      "relative isolate shrink-0 rounded-full px-4 py-2.5 text-[0.95rem] transition-colors duration-300",
+                      on ? "text-void" : "text-muted hover:text-ivory",
+                    )}
+                  >
+                    {on && (
+                      <motion.span
+                        layoutId="work-filter-pill"
+                        transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                        className="absolute inset-0 -z-10 rounded-full bg-ivory"
+                      />
+                    )}
+                    {!on && <span aria-hidden="true" className="absolute inset-0 -z-10 rounded-full border border-line" />}
+                    {c ?? "All work"}
+                    <span className={cn("ml-2 text-[0.75rem] tabular-nums", on ? "text-void/60" : "text-accent")}>{String(n).padStart(2, "0")}</span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <span />
+          )}
+
+          <div className="flex items-center gap-4">
+            <p className="label text-[0.75rem] text-dim" aria-live="polite">
+              Showing <span className="text-ivory">{String(visible.length).padStart(2, "0")}</span>
+            </p>
+            <div className="flex rounded-full border border-line p-1" role="group" aria-label="Layout">
+              {(
+                [
+                  { v: "grid", label: "Grid view", Icon: LayoutGrid },
+                  { v: "list", label: "List view", Icon: List },
+                ] as const
+              ).map(({ v, label, Icon }) => (
+                <button
+                  key={v}
+                  type="button"
+                  aria-pressed={view === v}
+                  aria-label={label}
+                  onClick={() => setView(v)}
+                  className={cn(
+                    "grid size-10 place-items-center rounded-full transition-colors duration-300",
+                    view === v ? "bg-panel-raised text-ivory" : "text-dim hover:text-ivory",
+                  )}
+                >
+                  <Icon className="size-4" aria-hidden="true" />
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
-      )}
-
-      <IndexList projects={visible} />
-
-      <div className="shell mt-32">
-        <p className="label mb-12 text-dim">Exhibition view</p>
-        <ul className="grid gap-x-10 gap-y-24 md:grid-cols-12">
-          {visible.map((p, i) => (
-            <li key={p.slug} className={GRID_LAYOUT[i % GRID_LAYOUT.length]}>
-              <ProjectCard project={p} sizes="(min-width: 768px) 50vw, 100vw" />
-            </li>
-          ))}
-        </ul>
       </div>
-    </>
+
+      <AnimatePresence mode="wait" initial={false}>
+        {view === "grid" ? (
+          <motion.div
+            key="grid"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="shell mt-10"
+          >
+            <motion.ul layout={!reduce} className="grid gap-4 md:grid-cols-12 md:gap-6">
+              <AnimatePresence mode="popLayout">
+                {visible.map((p, i) => (
+                  <motion.li
+                    key={p.slug}
+                    layout={!reduce}
+                    initial={{ opacity: 0, y: reduce ? 0 : 40 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: reduce ? 1 : 0.96 }}
+                    transition={{ duration: reduce ? 0.2 : 0.8, ease: EASE, delay: reduce ? 0 : Math.min(i, 4) * 0.06 }}
+                    className={spanFor(i, visible.length)}
+                  >
+                    <WorkTile project={p} featured={i === 0} />
+                  </motion.li>
+                ))}
+              </AnimatePresence>
+            </motion.ul>
+          </motion.div>
+        ) : (
+          <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} className="mt-6">
+            <IndexList projects={visible} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </section>
   );
 }
 
@@ -106,7 +173,7 @@ function IndexList({ projects }: { projects: Project[] }) {
       <div className="shell">
         <div className="label hidden grid-cols-12 gap-6 border-b border-line pb-3 text-[0.75rem] text-dim md:grid">
           <span className="col-span-1">No.</span>
-          <span className="col-span-6">Exhibit</span>
+          <span className="col-span-6">Project</span>
           <span className="col-span-3">Discipline</span>
           <span className="col-span-2 text-right">Status</span>
         </div>
@@ -118,16 +185,23 @@ function IndexList({ projects }: { projects: Project[] }) {
                 data-cursor="Open"
                 onPointerEnter={() => setHovered(p)}
                 onFocus={() => setHovered(null)}
-                className="group grid grid-cols-12 items-baseline gap-x-6 gap-y-1 py-6 md:py-7"
+                className="group relative isolate grid grid-cols-12 items-center gap-x-6 gap-y-1 py-6 md:py-8"
               >
-                <span className="label col-span-2 text-accent md:col-span-1">{projectNumber(p)}</span>
-                <span className="display col-span-10 text-[clamp(2rem,4.4vw,4rem)] leading-none transition-transform duration-700 ease-out-expo group-hover:translate-x-4 md:col-span-6">
+                <span aria-hidden="true" className="absolute inset-x-[calc(var(--gutter)*-1)] inset-y-0 -z-10 origin-bottom scale-y-0 bg-panel transition-transform duration-700 ease-out-expo group-hover:scale-y-100" />
+                {/* Mobile thumbnail */}
+                <span aria-hidden="true" className="col-span-3 row-span-2 aspect-square overflow-hidden border border-line md:hidden">
+                  <ProjectVisual project={p} sizes="25vw" />
+                </span>
+                <span className="label col-span-9 text-accent md:col-span-1">{projectNumber(p)}</span>
+                <span className="display col-span-9 text-[clamp(2rem,4.4vw,4.4rem)] leading-none transition-transform duration-700 ease-out-expo group-hover:translate-x-4 md:col-span-6">
                   {p.title}
                 </span>
-                <span className="col-span-10 col-start-3 text-muted md:col-span-3 md:col-start-auto">{p.category}</span>
-                <span className="label col-span-12 hidden items-center justify-end gap-2 text-[0.75rem] text-dim md:col-span-2 md:flex">
+                <span className="col-span-9 col-start-4 text-muted md:col-span-3 md:col-start-auto">{p.category}</span>
+                <span className="label col-span-12 hidden items-center justify-end gap-3 text-[0.75rem] text-dim md:col-span-2 md:flex">
                   {p.isPlaceholder ? "Placeholder" : p.year ?? "Case study"}
-                  <ArrowUpRight className="size-4 text-ivory opacity-0 transition-all duration-500 group-hover:rotate-45 group-hover:opacity-100" aria-hidden="true" />
+                  <span className="grid size-10 place-items-center rounded-full border border-line-strong transition-all duration-500 group-hover:border-accent group-hover:bg-accent group-hover:text-void">
+                    <ArrowUpRight className="size-4 transition-transform duration-500 group-hover:rotate-45" aria-hidden="true" />
+                  </span>
                 </span>
               </Link>
             </li>
@@ -138,7 +212,7 @@ function IndexList({ projects }: { projects: Project[] }) {
       {fine && (
         <motion.div
           aria-hidden="true"
-          className="pointer-events-none fixed left-0 top-0 z-40 w-[22rem]"
+          className="pointer-events-none fixed left-0 top-0 z-40 w-[24rem]"
           style={{ x: sx, y: sy, translateX: "-50%", translateY: "-115%" }}
         >
           <AnimatePresence>
@@ -151,7 +225,7 @@ function IndexList({ projects }: { projects: Project[] }) {
                 transition={{ type: "spring", stiffness: 260, damping: 24 }}
                 className={cn("absolute bottom-0 w-full overflow-hidden border border-line-strong bg-panel shadow-2xl", ASPECT[hovered.plate.aspect].css)}
               >
-                <ProjectVisual project={hovered} sizes="22rem" />
+                <ProjectVisual project={hovered} sizes="24rem" />
               </motion.div>
             )}
           </AnimatePresence>

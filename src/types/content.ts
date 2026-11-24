@@ -44,11 +44,28 @@ export interface Project {
   approach?: string;
   /** Only factual, supplied outcomes. Never invented metrics. */
   outcome?: string;
+  /** Tools used, e.g. ["Figma", "Illustrator"]. */
+  tools?: string[];
+  /** Link to the live site / app store / Behance post. */
+  liveUrl?: string;
+  /** Confirmed facts only, e.g. { value: "12", label: "Screens designed" }. */
+  highlights?: { value: string; label: string }[];
   featured: boolean;
   sortOrder: number;
   /** True while this entry is a placeholder slot awaiting real work. */
   isPlaceholder: boolean;
   plate: { variant: PlateVariant; aspect: PlateAspect };
+}
+
+export interface Testimonial {
+  quote: string;
+  name: string;
+  role: string;
+  company?: string;
+  /** Optional portrait in /public/testimonials/. Initials are shown when absent. */
+  avatar?: string;
+  /** True while this entry is sample text awaiting a real client quote. */
+  isPlaceholder: boolean;
 }
 
 export interface ServiceGroup {
